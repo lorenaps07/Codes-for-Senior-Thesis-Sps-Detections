@@ -1,11 +1,9 @@
 library(stringr)
 
 # Define your root directory
-<<<<<<< HEAD
-root_dir <- "E:/BirdNET analysis BTE"
-=======
+"E:/BirdNET analysis BTE"
+
 root_dir <- "D:/BirdNET analysis BTE"
->>>>>>> b5ad65d511128b3aa3b22b645a0e7b5ddd13a1b9
 
 # Define the species you are searching for
 desired_species <- c(
