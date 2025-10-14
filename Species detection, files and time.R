@@ -6,7 +6,9 @@ library(readr)
 #-------------------------------
 # 1. Define inputs
 #-------------------------------
+
 root_dir <- "E:/BirdNET analysis BTE"
+root_dir <- "D:/BirdNET analysis BTE"
 
 desired_species <- c(
   "Ceara Gnateater", "Gould's Toucanet", "Short-tailed Anttrush",
@@ -104,4 +106,3 @@ print(species_summary)
 
 cat("\n=== Example of Detailed Detections ===\n")
 print(head(detections, 10))
-
