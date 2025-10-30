@@ -1,0 +1,90 @@
+---
+title: "example-of-data-use"
+format: gfm
+---
+
+```{r}
+library(stringr)
+library(dplyr)
+library(readr)
+```
+
+```{r}
+root_dir <- "D:/BirdNET analysis BTE"
+
+desired_species <- c(
+  "Ceara Gnateater", "Gould's Toucanet", "Short-tailed Anttrush",
+  "Spot-winged Wood-Quail", "Band-tailed Manakin", "Variable Antshrike",
+  "Amazonian Motmot", "Bearded Bellbird"
+)
+txt_files <- list.files(
+  path = root_dir,
+  pattern = "\\.txt$",
+  full.names = TRUE,
+  recursive = TRUE
+)
+detections <- data.frame(
+  File = character(),    # full file path
+  Folder = character(),  # parent folder name
+  Species = character(),
+  Time = character(),
+  stringsAsFactors = FALSE
+)
+```
+
+# For Loops
+```{r}
+for (file in txt_files) {
+  file_content <- tryCatch(readLines(file, warn = FALSE), error = function(e) NULL)
+  
+  if (!is.null(file_content)) {
+    folder_name <- basename(dirname(file))  # immediate parent folder
+    
+    for (sp in desired_species) {
+      # Find lines mentioning this species
+      matching_lines <- file_content[str_detect(file_content, fixed(sp))]
+      
+      if (length(matching_lines) > 0) {
+        # Extract times (HH:MM or HH:MM:SS)
+        times <- str_extract(matching_lines, "\\b\\d{1,2}:\\d{2}(?::\\d{2})?\\b")
+        times[is.na(times)] <- "Unknown"
+        
+        # Store detections
+        temp <- data.frame(
+          File = normalizePath(file, winslash = "/"),  # full path, forward slashes for CSV compatibility
+          Folder = folder_name,
+          Species = sp,
+          Time = times,
+          stringsAsFactors = FALSE
+        )
+        detections <- rbind(detections, temp)
+      }
+    }
+  }
+}
+
+#-------------------------------
+# 5. Summaries
+#-------------------------------
+
+# Species summary
+species_summary <- detections %>%
+  group_by(Species) %>%
+  summarise(
+    Total_Detections = n(),
+    Files_with_Species = n_distinct(File)
+  ) %>%
+  arrange(desc(Total_Detections))
+
+# File-level summary (with folder)
+file_summary <- detections %>%
+  group_by(Folder, File) %>%
+  summarise(Species_Present = paste(unique(Species), collapse = "; "),
+            .groups = "drop")
+```
+
+# Print Results
+```{r}
+print(species_summary)
+print(file_summary)
+```
